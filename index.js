@@ -1,82 +1,99 @@
+// Konsol üzerinden paketlerimizi yüklüyoruz '> npm install apollo-server graphql ' daha sonra projeye dahil ediyoruz
 const { ApolloServer, gql } = require('apollo-server');
-const { users, posts, comments } = require('./data')
 
+// Şimdi data.json dosyasını projemize dahil edelim
+const {events, locations, users, participants} = require('./data.json');
+
+// Veri tiplerini hazırlayalım
 const typeDefs = gql`
+  type Event {
+    id: ID!,
+    title: String!,
+    desc: String,
+    date: String,
+    from: String,
+    to: String,
+    location_id: String,
+    location: [Location!]!
+    user_id: ID,
+    user: [User!]!
+    participant: [Participant!]! 
+  },
+
+  type Location {
+    id: ID!,
+    name: String!,
+    desc: String,
+    lat: Float,
+    lng: Float
+  },
 
   type User {
     id: ID!,
-    full_name: String!,
-    posts: [Post!]!
-    comments: [Comments]
+    username: String!,
+    email: String!
   },
 
-  type Post {
+  type Participant {
     id: ID!,
-    title: String!,
     user_id: ID!,
-    user: User!
-    comments: [Comments!]
+    event_id: ID!
+    username: [User]
   },
-
-  type Comments {
-    id: ID!,
-    text: String!,
-    post_id: ID!,
-    post: Post!
-    user_id: String!,
-    user: User!,
-  },
-
+ 
+ # Queryleri oluşturlım
   type Query {
-    # Users
-    users: [User!]!
-    user(id: ID!): User!
+    users:  [User]
+    user(id: ID!):  [User]
 
+    # Events 
+    events:  [Event]
+    event(id: ID!):  [Event]
 
-    #Posts
-    posts: [Post!]!
-    post (id: ID!  filter: String) : Post!
+    # Pariticipants
+    participants: [Participant!]!
+    participant(id: ID!): [Participant]
 
-    #Commets
-    comments: [Comments]
-    comment(id: ID!): [Comments] 
-  }
-`
+    # Locations
+    locations: [Location!]!
+    location(id: ID!): [Location]
+  },
 
+`;
 
+// Daha sonra da yukarıdaki querylere karşılık gelecek cevapları yazalım
 const resolvers = {
   Query: {
+    //Users
     users: () => users,
-    user: (parent, args ) => users.find(user => user.id === args.id ),
+    user: (parent, args) => users.filter(user => user.id == args.id),
 
-    posts: () => posts,
-    post: (parent,args) => posts.find ( post => post.id === args.id || post.title.startsWith(args.filter) ),
+    //Events 
+    events: () => events,
+    event: (parent, args) => events.filter(event => event.id == args.id),
 
-    comments: () => comments,
-    comment: (parent, args) => comments.filter( comment => comment.id === args.id)
+    // Pariticipants
+    participants:  () => participants,
+    participant:  (parents,args) => participants.filter(item => item.id == args.id),
+
+    // Locations
+    locations: () => locations,
+    location: (parents, args ) => locations.filter( location => location.id == args.id )
   },
 
-  User:{
-    posts: (parent,args) => posts.filter(post => post.user_id === parent.id),
-    comments: (parent, args) => comments.filter( comment => comment.user_id === parent.id)
+  // Bu kısımda özel cevaplar oluşturdum
+  Event: {
+    user: (parent) => users.filter(user => user.id === parent.user_id),
+    participant: (parent) => participants.filter(item => item.event_id === parent.id),
+    location: (parent) => locations.filter ( location => location.id === parent.location_id)
   },
-  Post: {
-    user: (parent, args ) => users.find(user =>  user.id === parent.user_id),
-    comments: (parent, args) => comments.filter( comment => comment.post_id === parent.id),
-  },
-  Comments:{
-    user: (parent, args) => users.find(user => user.id === parent.user_id),
-    post: (parent,args) => posts.find(post => post.id === parent.post_id),
+
+  Participant: {
+    username: ( parent , args) => users.filter(user => user.id === parent.user_id)
   }
 };
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  csrfPrevention: true,
-});
-
-// The `listen` method launches a web server.
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+// Servere başlatmak için bu kodları yazalım
+const server = new ApolloServer({ typeDefs, resolvers, csrfPrevention: true })
+  .listen()
+  .then(({ url }) => console.log('server started on ' + url));
