@@ -4,7 +4,7 @@ Kullanıcılar, etkinlikler, etkinliklerin yapılacağı konum ve etkinlik katı
 
 
 ## Gereksinimler
-- [şuradaki](https://github.com/Kodluyoruz/taskforce/blob/main/graphql/odev-01/data.json) veri seti kullanılarak bir GraphQL sunucusu ayağa kaldırılmalıdır.
+- [şuradaki](https://github.com/nuhgnc/GraphQl/blob/1.odev/data.json) veri seti kullanılarak bir GraphQL sunucusu ayağa kaldırılmalıdır.
 - Temel olarak User, Event, Location ve Participant tiplerini oluşturmalısınız. Bu tiplerle alakalı fieldları veri seti üzerinden görüntüleyebilirsiniz.
 - Bir User'a ait bir veya birden fazla Event olabilir.
 - Bir Event, bir User ile ilişkili olmalıdır.
