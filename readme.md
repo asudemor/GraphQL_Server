@@ -146,7 +146,7 @@ query getAllLocations {
 ```
 
 ### çıktısı ise :
-![1. query](./img\allLocations.jpeg)
+![1. query](./img/allLocations.jpeg)
 
 6. ### Sadece bir lokasyon bilgisi için kullandığım query
 ```json
@@ -162,7 +162,7 @@ query getLocation {
 ```
 
 ### çıktısı ise :
-![1. query](./img\getLocation.jpeg)
+![1. query](./img/getLocation.jpeg)
 
 7. ### Bütün participantslara ulaşmak için kullandığım query
 ```json
