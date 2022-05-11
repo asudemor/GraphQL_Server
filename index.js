@@ -1,66 +1,82 @@
 const { ApolloServer, gql } = require('apollo-server');
-const { ApolloServerPluginLandingPageGraphQLPlayground} = require('apollo-server-core');
-const { authors, books} = require ('./data.js')
-
+const { users, posts, comments } = require('./data')
 
 const typeDefs = gql`
-  type Author {
-    id: ID!
-    name: String!
-    surname: String!
-    age: Int
-    books(filter: String): [Book!]
-  }
 
-  type Book {
-    id: ID!
-    title: String!
-    author: Author
-    author_id: String!
-    score: Float
-    isPublished: Boolean!
-  }
+  type User {
+    id: ID!,
+    full_name: String!,
+    posts: [Post!]!
+    comments: [Comments]
+  },
+
+  type Post {
+    id: ID!,
+    title: String!,
+    user_id: ID!,
+    user: User!
+    comments: [Comments!]
+  },
+
+  type Comments {
+    id: ID!,
+    text: String!,
+    post_id: ID!,
+    post: Post!
+    user_id: String!,
+    user: User!,
+  },
 
   type Query {
-    books: [Book!]
-    book(id: ID!) : Book! 
+    # Users
+    users: [User!]!
+    user(id: ID!): User!
 
-    authors: [Author!]
-    author(id: ID!) : Author!
+
+    #Posts
+    posts: [Post!]!
+    post (id: ID!  filter: String) : Post!
+
+    #Commets
+    comments: [Comments]
+    comment(id: ID!): [Comments] 
   }
-`;
+`
+
 
 const resolvers = {
   Query: {
-    books: () => books,
-    book: (parent, args) => books.find( book => book.id === args.id),
+    users: () => users,
+    user: (parent, args ) => users.find(user => user.id === args.id ),
 
-    authors : () => authors,
-    author: (parent, args) => authors.find( author => author.id === args.id),
+    posts: () => posts,
+    post: (parent,args) => posts.find ( post => post.id === args.id || post.title.startsWith(args.filter) ),
+
+    comments: () => comments,
+    comment: (parent, args) => comments.filter( comment => comment.id === args.id)
   },
 
-  Book: {
-    author: (parent) => authors.find(author => author.id == parent.author_id),
+  User:{
+    posts: (parent,args) => posts.filter(post => post.user_id === parent.id),
+    comments: (parent, args) => comments.filter( comment => comment.user_id === parent.id)
   },
-  
-  Author: {
-    books: (parent, args) =>  books.filter (book =>  {
-      let filtered = book.author_id === parent.id && book.title.startsWith( args.filter || "");
-
-      if(args.filter){
-        filtered = book.author_id === parent.id && book.title.toLowerCase().startsWith( args.filter.toLowerCase() || "" );
-      }
-      return filtered
-    }),
+  Post: {
+    user: (parent, args ) => users.find(user =>  user.id === parent.user_id),
+    comments: (parent, args) => comments.filter( comment => comment.post_id === parent.id),
   },
+  Comments:{
+    user: (parent, args) => users.find(user => user.id === parent.user_id),
+    post: (parent,args) => posts.find(post => post.id === parent.post_id),
+  }
 };
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
+  csrfPrevention: true,
 });
 
+// The `listen` method launches a web server.
 server.listen().then(({ url }) => {
-  console.log('apollo server başaladı' + url);
+  console.log(`🚀  Server ready at ${url}`);
 });
