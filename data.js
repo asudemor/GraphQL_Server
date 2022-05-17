@@ -2,10 +2,12 @@ const users = [
   {
     id: '1',
     full_name: 'Perle Banet',
+    age: 22,
   },
   {
     id: '2',
     full_name: 'Bernardine Tyler',
+    age: 42,
   },
 ];
 
