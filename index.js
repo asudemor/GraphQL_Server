@@ -92,6 +92,8 @@ type User {
 
   type Subscription{
     userCreated: User!
+    userUpdated: User!
+    userDeleted: User!
   }
 `
 
@@ -100,6 +102,12 @@ const resolvers = {
   Subscription: {
     userCreated: {
       subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("userCreated")
+    },
+    userUpdated: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("userUpdated")
+    },
+    userDeleted: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("userDeleted")
     }
   },
   Query: {
@@ -135,14 +143,16 @@ const resolvers = {
         ...users[user_index],
         ...data,
       });
+      pubsub.publish('userUpdated', {userUpdated: updated_user})
       return updated_user;
     },
     deleteUser: (parent, { id }) => {
       const user_index = users.findIndex((user) => user.id === id);
       if (user_index === -1) throw new Error('User not found');
-
+      
       const deleted_user = users[user_index];
       users.splice(user_index, 1);
+      pubsub.publish('userDeleted', {userDeleted: deleted_user})
       return deleted_user;
     },
     deleteAllUsers: () => {
