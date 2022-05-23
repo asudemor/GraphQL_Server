@@ -1,26 +1,14 @@
-const { ApolloServer, gql } = require('apollo-server');
+const { GraphQLServer, PubSub } = require('graphql-yoga')
 const {nanoid} = require('nanoid')
 const { users, posts, comments } = require('./data')
 
-const typeDefs = gql`
 
-  input createUserInput {
-    full_name: String!
-    age: Int!
-  }
 
-  input updateUserInput{
-    full_name: String
-    age: Int
-  }
+const typeDefs = `
 
-  type DeleteAllOutput {
-    count: Int!
-    posts: Post!
-  }
-
-  type User {
-    id: ID!,
+# Veri Tipleri
+type User {
+  id: ID!,
     full_name: String!,
     age: String!
     posts: [Post!]!
@@ -44,7 +32,30 @@ const typeDefs = gql`
     user_id: String!,
     user: User!,
   },
+  type DeleteAllOutput {
+    count: Int!
+    posts: Post!
+  }
 
+  
+# Input İşlemleri
+  input createUserInput {
+    full_name: String!
+    age: Int!
+  }
+
+  input updateUserInput{
+    full_name: String
+    age: Int
+  }
+
+  input upadtePostInput {
+    title: String,
+    user_id: String
+  }
+
+
+# Query Sorguları
   type Query {
     # Users
     users: [User!]!
@@ -59,6 +70,8 @@ const typeDefs = gql`
     comments: [Comments]
     comment(id: ID!): [Comments] 
   },
+
+# Mutation İşlemleri 
   type Mutation{
     # Users
     createUser(data: createUserInput!) : User!
@@ -68,6 +81,7 @@ const typeDefs = gql`
 
     # Posts
     createPost(title: String!, user_id: ID!): Post!
+    updatePost(id: ID!, data: upadtePostInput!): Post!
     deletePost (id:ID!): Post!
     deleteAllPosts: DeleteAllOutput!
 
@@ -75,10 +89,19 @@ const typeDefs = gql`
     createComment(text: String!, post_id: ID!, user_id: ID!): Comments!
     deleteComment(id: ID!): Comments!
   }
+
+  type Subscription{
+    userCreated: User!
+  }
 `
 
 
 const resolvers = {
+  Subscription: {
+    userCreated: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("userCreated")
+    }
+  },
   Query: {
     users: () => users,
     user: (parent, args) => users.find((user) => user.id === args.id),
@@ -95,12 +118,14 @@ const resolvers = {
   },
   Mutation: {
     // Users Mutaiton
-    createUser: (parent, { full_name }) => {
+    createUser: (parent, {data:{ full_name, age }}) => {
       const user = {
         id: nanoid(),
-        full_name: data.full_name,
+        full_name: full_name,
+        age: age
       };
       users.push(user);
+      pubsub.publish('userCreated', {userCreated:user})
       return user;
     },
     updateUser: (parent, { id, data }) => {
@@ -136,6 +161,15 @@ const resolvers = {
       };
       posts.push(post);
       return post;
+    },
+    updatePost: (parent, { id, data }) => {
+      const post_index = posts.findIndex((post) => post.id === id);
+      if (post_index == -1) throw new Error('Post not found');
+      const updated_post = (posts[post_index] = {
+        ...posts[post_index],
+        ...data,
+      });
+      return updated_post;
     },
     deletePost: (parent, { id }) => {
       const post_index = posts.findIndex((post) => post.id === id);
@@ -189,19 +223,11 @@ const resolvers = {
 };
 
 
+const pubsub = new PubSub()
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  csrfPrevention: true,
-});
+const server = new GraphQLServer({ typeDefs, resolvers, context: { pubsub } })
 
-// The `listen` method launches a web server.
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
-
-
+server.start(({port}) => console.log('server listening on ' + port))
 
 
 
