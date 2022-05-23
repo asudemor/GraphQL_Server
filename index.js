@@ -54,6 +54,11 @@ type User {
     user_id: String
   }
 
+  input upadteCommentInput {
+    text: String!
+    post_id: String
+  }
+
 
 # Query Sorguları
   type Query {
@@ -87,13 +92,24 @@ type User {
 
     # Comments
     createComment(text: String!, post_id: ID!, user_id: ID!): Comments!
+    updateComment(id: ID!, data: upadteCommentInput!): Comments!
     deleteComment(id: ID!): Comments!
+
   }
 
   type Subscription{
     userCreated: User!
     userUpdated: User!
     userDeleted: User!
+
+
+    postCreated: Post!
+    postUpdated: Post!
+    postDeleted: Post!
+
+    createComment: Comments!
+    updateComment: Comments!
+    deleteComment: Comments!
   }
 `
 
@@ -108,7 +124,26 @@ const resolvers = {
     },
     userDeleted: {
       subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("userDeleted")
-    }
+    },
+    postCreated: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("postCreated")
+    },
+    postUpdated: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("postUpdated")
+    },
+    postDeleted: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("postDeleted")
+    },
+    createComment: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("createComment")
+    },
+    updateComment: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("updateComment")
+    },
+    deleteComment: {
+      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("deleteComment")
+    },
+    
   },
   Query: {
     users: () => users,
@@ -163,29 +198,32 @@ const resolvers = {
     },
 
     // Posts Mutation
-    createPost: (parent, args) => {
+    createPost: (parent, args, {pubsub}) => {
       const post = {
         id: nanoid(),
         title: args.title,
         user_id: args.user_id,
       };
       posts.push(post);
+      pubsub.publish('postCreated', {postCreated: post})
       return post;
     },
-    updatePost: (parent, { id, data }) => {
+    updatePost: (parent, { id, data }, {pubsub}) => {
       const post_index = posts.findIndex((post) => post.id === id);
       if (post_index == -1) throw new Error('Post not found');
       const updated_post = (posts[post_index] = {
         ...posts[post_index],
         ...data,
       });
+      pubsub.publish('postUpdated', {postUpdated:updated_post})
       return updated_post;
     },
-    deletePost: (parent, { id }) => {
+    deletePost: (parent, { id }, {pubsub}) => {
       const post_index = posts.findIndex((post) => post.id === id);
       if (post_index === -1) throw new Error('Post not found');
       const deleted_post = posts[post_index];
       posts.splice(post_index, 1);
+      pubsub.publish('postDeleted', {postDeleted:deleted_post})
       return deleted_post;
     },
     deleteAllPosts: () => {
@@ -203,13 +241,25 @@ const resolvers = {
         post_id: args.post_id,
       };
       comments.push(comment);
+      pubsub.publish('createComment',{createComment:comment})
       return comment;
     },
+    updateComment: (parent, { id, data }, {pubsub}) => {
+      const comment_index = comments.findIndex((comment) => comment.id === id);
+      if (comment_index == -1) throw new Error('Comment not found');
+      const updated_comment = (comments[comment_index] = {
+        ...comments[comment_index],
+        ...data,
+      });
+      pubsub.publish('updateComment', {postUpdated:updated_comment})
+      return updated_comment;
+    },
 
-    deleteComment: (parent, { id }) => {
+    deleteComment: (parent, { id }, {pubsub}) => {
       const comment_index = comments.findIndex((comment) => comment.id === id);
       if (comment_index === -1) throw new Error('Comment not found');
       const deleted_comment = comments[comment_index];
+      pubsub.publish('deleteComment', {deleteComment:deleted_comment})
       comments.splice(comment_index, 1);
       return deleted_comment;
     },
