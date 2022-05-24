@@ -1,8 +1,6 @@
-const { GraphQLServer, PubSub } = require('graphql-yoga')
-const {nanoid} = require('nanoid')
-const { users, posts, comments } = require('./data')
-
-
+const { GraphQLServer, PubSub, withFilter } = require('graphql-yoga');
+const { nanoid } = require('nanoid');
+const { users, posts, comments } = require('./data');
 
 const typeDefs = `
 
@@ -94,6 +92,7 @@ type User {
     createComment(text: String!, post_id: ID!, user_id: ID!): Comments!
     updateComment(id: ID!, data: upadteCommentInput!): Comments!
     deleteComment(id: ID!): Comments!
+    deleteAllComment: DeleteAllOutput!
 
   }
 
@@ -103,47 +102,58 @@ type User {
     userDeleted: User!
 
 
-    postCreated: Post!
+    postCreated(user_id: ID ): Post!
     postUpdated: Post!
     postDeleted: Post!
 
-    createComment: Comments!
+    createComment(post_id: ID): Comments!
     updateComment: Comments!
     deleteComment: Comments!
   }
-`
-
+`;
 
 const resolvers = {
   Subscription: {
     userCreated: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("userCreated")
+      subscribe: (parent, args, { pubsub }) =>
+        pubsub.asyncIterator('userCreated'),
     },
     userUpdated: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("userUpdated")
+      subscribe: (parent, args, { pubsub }) =>
+        pubsub.asyncIterator('userUpdated'),
     },
     userDeleted: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("userDeleted")
+      subscribe: (parent, args, { pubsub }) =>
+        pubsub.asyncIterator('userDeleted'),
     },
     postCreated: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("postCreated")
+      subscribe: withFilter(
+        (parent, args, { pubsub }) => pubsub.asyncIterator('postCreated'),
+        (payloads, variables) => (variables.user_id) ? payloads.postCreated.user_id === variables.user_id : true
+      ),
     },
     postUpdated: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("postUpdated")
+      subscribe: (parent, args, { pubsub }) =>
+        pubsub.asyncIterator('postUpdated'),
     },
     postDeleted: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("postDeleted")
+      subscribe: (parent, args, { pubsub }) =>
+        pubsub.asyncIterator('postDeleted'),
     },
     createComment: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("createComment")
+      subscribe: withFilter(
+        (parent, args, { pubsub }) => pubsub.asyncIterator('createComment'),
+          (payloads,variables) => (variables.post_id) ? payloads.createComment.post_id === variables.post_id : true
+      )
     },
     updateComment: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("updateComment")
+      subscribe: (parent, args, { pubsub }) =>
+        pubsub.asyncIterator('updateComment'),
     },
     deleteComment: {
-      subscribe: (parent, args, { pubsub }) =>  pubsub.asyncIterator("deleteComment")
+      subscribe: (parent, args, { pubsub }) =>
+        pubsub.asyncIterator('deleteComment'),
     },
-    
   },
   Query: {
     users: () => users,
@@ -161,14 +171,14 @@ const resolvers = {
   },
   Mutation: {
     // Users Mutaiton
-    createUser: (parent, {data:{ full_name, age }}) => {
+    createUser: (parent, { data: { full_name, age } }) => {
       const user = {
         id: nanoid(),
         full_name: full_name,
-        age: age
+        age: age,
       };
       users.push(user);
-      pubsub.publish('userCreated', {userCreated:user})
+      pubsub.publish('userCreated', { userCreated: user });
       return user;
     },
     updateUser: (parent, { id, data }) => {
@@ -178,62 +188,62 @@ const resolvers = {
         ...users[user_index],
         ...data,
       });
-      pubsub.publish('userUpdated', {userUpdated: updated_user})
+      pubsub.publish('userUpdated', { userUpdated: updated_user });
       return updated_user;
     },
     deleteUser: (parent, { id }) => {
       const user_index = users.findIndex((user) => user.id === id);
       if (user_index === -1) throw new Error('User not found');
-      
+
       const deleted_user = users[user_index];
       users.splice(user_index, 1);
-      pubsub.publish('userDeleted', {userDeleted: deleted_user})
+      pubsub.publish('userDeleted', { userDeleted: deleted_user });
       return deleted_user;
     },
     deleteAllUsers: () => {
       const length = users.length;
-     const allUsers = users
-      users.splice(0,length) ;
-      return {count: length}
+      const allUsers = users;
+      users.splice(0, length);
+      return { count: length };
     },
 
     // Posts Mutation
-    createPost: (parent, args, {pubsub}) => {
+    createPost: (parent, args, { pubsub }) => {
       const post = {
         id: nanoid(),
         title: args.title,
         user_id: args.user_id,
       };
       posts.push(post);
-      pubsub.publish('postCreated', {postCreated: post})
+      pubsub.publish('postCreated', { postCreated: post });
       return post;
     },
-    updatePost: (parent, { id, data }, {pubsub}) => {
+    updatePost: (parent, { id, data }, { pubsub }) => {
       const post_index = posts.findIndex((post) => post.id === id);
       if (post_index == -1) throw new Error('Post not found');
       const updated_post = (posts[post_index] = {
         ...posts[post_index],
         ...data,
       });
-      pubsub.publish('postUpdated', {postUpdated:updated_post})
+      pubsub.publish('postUpdated', { postUpdated: updated_post });
       return updated_post;
     },
-    deletePost: (parent, { id }, {pubsub}) => {
+    deletePost: (parent, { id }, { pubsub }) => {
       const post_index = posts.findIndex((post) => post.id === id);
       if (post_index === -1) throw new Error('Post not found');
       const deleted_post = posts[post_index];
       posts.splice(post_index, 1);
-      pubsub.publish('postDeleted', {postDeleted:deleted_post})
+      pubsub.publish('postDeleted', { postDeleted: deleted_post });
       return deleted_post;
     },
     deleteAllPosts: () => {
       const length = posts.length;
-      posts.splice(0,length) ;
-      return {count: length}
+      posts.splice(0, length);
+      return { count: length };
     },
-    
+
     // Comments Mutation
-    createComment: (parent, args) => {
+    createComment: (parent, args, { pubsub }) => {
       const comment = {
         id: nanoid(),
         text: args.text,
@@ -241,27 +251,32 @@ const resolvers = {
         post_id: args.post_id,
       };
       comments.push(comment);
-      pubsub.publish('createComment',{createComment:comment})
+      pubsub.publish('createComment', { createComment: comment });
       return comment;
     },
-    updateComment: (parent, { id, data }, {pubsub}) => {
+    updateComment: (parent, { id, data }, { pubsub }) => {
       const comment_index = comments.findIndex((comment) => comment.id === id);
       if (comment_index == -1) throw new Error('Comment not found');
       const updated_comment = (comments[comment_index] = {
         ...comments[comment_index],
         ...data,
       });
-      pubsub.publish('updateComment', {postUpdated:updated_comment})
+      pubsub.publish('updateComment', { postUpdated: updated_comment });
       return updated_comment;
     },
 
-    deleteComment: (parent, { id }, {pubsub}) => {
+    deleteComment: (parent, { id }, { pubsub }) => {
       const comment_index = comments.findIndex((comment) => comment.id === id);
       if (comment_index === -1) throw new Error('Comment not found');
       const deleted_comment = comments[comment_index];
-      pubsub.publish('deleteComment', {deleteComment:deleted_comment})
+      pubsub.publish('deleteComment', { deleteComment: deleted_comment });
       comments.splice(comment_index, 1);
       return deleted_comment;
+    },
+    deleteAllComment: () => {
+      const length = comments.length;
+      comments.splice(0, length);
+      return { count: length };
     },
   },
 
@@ -282,14 +297,10 @@ const resolvers = {
   },
 };
 
+const pubsub = new PubSub();
 
-const pubsub = new PubSub()
+const server = new GraphQLServer({ typeDefs, resolvers, context: { pubsub } });
 
-const server = new GraphQLServer({ typeDefs, resolvers, context: { pubsub } })
-
-server.start(({port}) => console.log('server listening on ' + port))
-
-
+server.start(({ port }) => console.log('server listening on ' + port));
 
 ////////////////////////////////////////////////
-
