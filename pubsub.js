@@ -1,10 +1,13 @@
 const { RedisPubSub } = require ('graphql-redis-subscriptions');
 const Redis = require ('ioredis');
 
+const dotenv = require('dotenv')
+dotenv.config()
+
 const options = {
-  host: "redis-13960.c293.eu-central-1-1.ec2.cloud.redislabs.com",
-  port: 13960,
-  password: "9uC7sv6T5AzB7GO1vKgX2EtwQdLqTh1k",
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
   retryStrategy: times => {
     // reconnect after
     return Math.min(times * 50, 2000);
