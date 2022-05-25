@@ -1,8 +1,11 @@
-const { GraphQLServer, PubSub, withFilter } = require('graphql-yoga');
+const { ApolloServer, gql, withFilter, } = require('apollo-server');
 const { nanoid } = require('nanoid');
-const { users, posts, comments } = require('./data');
 
-const typeDefs = `
+const { users, posts, comments } = require('./data');
+const pubsub = require('./pubsub')
+
+
+const typeDefs = gql`
 
 # Veri Tipleri
 type User {
@@ -297,10 +300,12 @@ const resolvers = {
   },
 };
 
-const pubsub = new PubSub();
 
-const server = new GraphQLServer({ typeDefs, resolvers, context: { pubsub } });
 
-server.start(({ port }) => console.log('server listening on ' + port));
+const server = new ApolloServer({ typeDefs, resolvers, context: { pubsub } });
+
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+});
 
 ////////////////////////////////////////////////
