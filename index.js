@@ -1,7 +1,9 @@
 // Konsol üzerinden paketlerimizi yüklüyoruz '> npm install apollo-server graphql ' daha sonra projeye dahil ediyoruz
-const { ApolloServer, gql } = require('apollo-server');
+const { ApolloServer, gql, PubSub, withFilter } = require('apollo-server');
 
 const  { nanoid }  = require ('nanoid')
+
+const pubsub = new PubSub();
 
 // Şimdi data.json dosyasını projemize dahil edelim
 const {events, locations, users, participants} = require('./data.json');
@@ -84,12 +86,26 @@ const typeDefs = gql`
     deleteAllUSer: DeleteAllUser!
 
     # Gereksiz uzayacağı için user dışındakileri yapmamaya karar verdim :/
+  },
+  type Subscription {
+    createdUser: User!
+    updatedUser: User!
+
+
   }
 
 `;
 
 // Daha sonra da yukarıdaki querylere karşılık gelecek cevapları yazalım
 const resolvers = {
+  Subscription:{
+    createdUser: {
+      subscribe: () => pubsub.asyncIterator('createdUser')
+    },
+    updatedUser: {
+      subscribe: () => pubsub.asyncIterator('updatedUser')
+    }
+  },
   Query: {
     //Users
     users: () => users,
@@ -120,6 +136,7 @@ const resolvers = {
           username
         }
         users.push(newUser)
+        pubsub.publish('createdUser', {createdUser: newUser})
         return newUser
       }
       throw new Error('Kulllanıcı zaten kayıtlı')
@@ -132,6 +149,7 @@ const resolvers = {
         ...users[user_index],
         ...data,
       });
+      pubsub.publish('updatedUser', {updatedUser: updated_user})
       return updated_user
     },
     deleteUser: (parent, {id}) =>{
@@ -154,8 +172,6 @@ const resolvers = {
         count
       }
     },
-
-
   },
 
   // Bu kısımda özel cevaplar oluşturdum
