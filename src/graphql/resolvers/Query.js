@@ -13,4 +13,4 @@ const Query = {
       db.comments.filter((comment) => comment.id === args.id),
   }
 
-  module.exports = Query;
+  module.exports.Query = Query;

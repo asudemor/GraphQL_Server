@@ -1,13 +1,13 @@
-const { ApolloServer, withFilter, } = require('apollo-server');
+const { ApolloServer } = require('apollo-server');
 
 
 const db = require('./data');
 const pubsub = require('./pubsub')
 
-const { typeDefs } = require ('./graphql/schema')
-const resolvers = require ('./graphql/resolvers/index')
+const  typeDefs = require ('./graphql/type-defs/')
+const resolvers = require ('./graphql/resolvers/')
 
-
+console.log(resolvers)
 
 
 const server = new ApolloServer({ typeDefs, resolvers, context: { pubsub, db } });

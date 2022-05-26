@@ -42,4 +42,4 @@ const Subscription ={
         pubsub.asyncIterator('deleteComment'),
     },
   }
-  module.exports = Subscription;
+  module.exports.Subscription = Subscription;

@@ -2,7 +2,7 @@ const { nanoid } = require('nanoid');
 const pubsub = require('../../pubsub');
 
 
-const Mutaiton = {
+const Mutation = {
     // Users Mutaiton
     createUser: (parent, { data: { full_name, age }}, {db}) => {
       const user = {
@@ -113,4 +113,4 @@ const Mutaiton = {
     },
   }
 
-  module.exports = Mutaiton;
+  module.exports.Mutation = Mutation;

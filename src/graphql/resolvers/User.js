@@ -3,4 +3,4 @@ const User = {
     comments: (parent, args, {db}) =>
       db.comments.filter((comment) => comment.user_id === parent.id),
   }
-module.exports = User
+module.exports.User = User
