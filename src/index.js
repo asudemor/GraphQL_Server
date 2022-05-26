@@ -1,13 +1,11 @@
-const { ApolloServer } = require('apollo-server');
+import { ApolloServer } from "apollo-server";
 
 
-const db = require('./data');
-const pubsub = require('./pubsub')
+import db from "./data";
+import pubsub from "./pubsub";
 
-const  typeDefs = require ('./graphql/type-defs/')
-const resolvers = require ('./graphql/resolvers/')
-
-console.log(resolvers)
+import typeDefs from "./graphql/type-defs/";
+import resolvers from "./graphql/resolvers/";
 
 
 const server = new ApolloServer({ typeDefs, resolvers, context: { pubsub, db } });
