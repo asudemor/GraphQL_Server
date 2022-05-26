@@ -21,4 +21,4 @@ const pubsub = new RedisPubSub({
   subscriber: new Redis(options)
 });
 
-export default pubsub
+module.exports = pubsub;
