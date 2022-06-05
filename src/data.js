@@ -3,11 +3,13 @@ const users = [
     id: '1',
     full_name: 'Perle Banet',
     age: 22,
+    profile_photo: 'https://randomuser.me/api/portraits/thumb/men/89.jpg'
   },
   {
     id: '2',
     full_name: 'Bernardine Tyler',
     age: 42,
+    profile_photo: 'https://randomuser.me/api/portraits/thumb/men/81.jpg'
   },
 ];
 
@@ -15,16 +17,19 @@ const posts = [
   {
     id: '1',
     title: 'Return, The',
+    description: '1 nolu postun açıklaması bu şeklide olacak',
     user_id: '1',
   },
   {
     id: '2',
     title: 'Bullet for Joey, A',
+    description: '2 nolu postun açıklaması bu şeklide olacak',
     user_id: '1',
   },
   {
     id: '3',
     title: 'Ten Inch Hero',
+    description: '3 nolu postun açıklaması bu şeklide olacak',
     user_id: '2',
   },
 ];

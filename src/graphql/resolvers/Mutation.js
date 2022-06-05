@@ -46,6 +46,7 @@ const Mutation = {
         id: nanoid(),
         title: args.title,
         user_id: args.user_id,
+        description: args.description
       };
       db.posts.push(post);
       pubsub.publish('postCreated', { postCreated: post });
