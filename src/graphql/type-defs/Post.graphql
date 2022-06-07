@@ -2,6 +2,7 @@ type Post {
   id: ID!
   title: String!
   description: String
+  short_description: String
   cover: String
   user_id: ID!
   user: User!
@@ -12,12 +13,14 @@ type Post {
 input upadtePostInput {
   title: String
   user_id: String
+  short_description: String
   description: String
   cover: String
 }
 input createPostInput {
   title: String
   user_id: String
+  short_description: String
   description: String
   cover: String
 }
