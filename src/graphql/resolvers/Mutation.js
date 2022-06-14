@@ -41,14 +41,16 @@ const Mutation = {
     },
 
     // Posts Mutation
-    createPost: (parent, args, { pubsub, db }) => {
+    createPost: (parent, {data}, { pubsub, db }) => {
       const post = {
         id: nanoid(),
-        title: args.title,
-        user_id: args.user_id,
-        description: args.description
+        title: data.title,
+        user_id: data.user_id,
+        description: data.description,
+        short_description: data.short_description,
+        cover: data.cover
       };
-      db.posts.push(post);
+      db.posts.unshift(post);
       pubsub.publish('postCreated', { postCreated: post });
       return post;
     },

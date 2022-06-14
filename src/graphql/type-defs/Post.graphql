@@ -18,11 +18,11 @@ input upadtePostInput {
   cover: String
 }
 input createPostInput {
-  title: String
-  user_id: String
-  short_description: String
-  description: String
-  cover: String
+  title: String!
+  user_id: String!
+  short_description: String!
+  description: String!
+  cover: String!
 }
 
 # Query Sorguları
@@ -35,7 +35,7 @@ type Query {
 # Mutation İşlemleri
 type Mutation {
   # Posts
-  createPost(title: String!, user_id: ID!, description: String!): Post!
+  createPost(data: createPostInput!): Post!
   updatePost(id: ID!, data: upadtePostInput!): Post!
   deletePost(id: ID!): Post!
   deleteAllPosts: DeleteAllOutput!
