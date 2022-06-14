@@ -41,5 +41,9 @@ const Subscription ={
       subscribe: (parent, args, { pubsub }) =>
         pubsub.asyncIterator('deleteComment'),
     },
+    postCount: {
+      subscribe: (parent, args, {pubsub}) => pubsub.asyncIterator('postCount')
+    },
   }
   module.exports.Subscription = Subscription;
+

@@ -45,4 +45,5 @@ type Subscription {
   postCreated(user_id: ID): Post!
   postUpdated: Post!
   postDeleted: Post!
+  postCount: Int!
 }

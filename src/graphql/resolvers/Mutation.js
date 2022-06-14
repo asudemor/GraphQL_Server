@@ -52,6 +52,7 @@ const Mutation = {
       };
       db.posts.unshift(post);
       pubsub.publish('postCreated', { postCreated: post });
+      pubsub.publish('postCount', {postCount: db.posts.length })
       return post;
     },
     updatePost: (parent, { id, data }, { pubsub, db }, ) => {
@@ -77,6 +78,7 @@ const Mutation = {
       db.posts.splice(0, length);
       return { count: length };
     },
+
 
     // Comments Mutation
     createComment: (parent, args, { pubsub, db }) => {

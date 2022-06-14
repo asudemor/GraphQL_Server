@@ -11,6 +11,7 @@ const Query = {
     comments: (parent, args, {db}) => db.comments,
     comment: (parent, args, {db}) =>
       db.comments.filter((comment) => comment.id === args.id),
+
   }
 
   module.exports.Query = Query;
