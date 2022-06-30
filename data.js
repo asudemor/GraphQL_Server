@@ -1,41 +1,34 @@
-const authors = [
-  {
-    id: '1',
-    name: 'Albert',
-    surname: 'Camus',
-    age: '50',
-  },
-  {
-    id: '2',
-    name: 'George',
-    surname: 'Orwell',
-    age: '45'
-  },
-];
+const countries = [ 
+    {id: 1, name: 'France', code: 'FR', continent_code: 'EU'},
+    {id: 2, name: 'Germany', code: 'DE', continent_code: 'EU'},
+    {id: 3, name: 'Italy', code: 'IT', continent_code: 'EU'},
+    {id: 4, name: 'Poland', code: 'PL', continent_code: 'EU'},
+    {id: 5, name: 'Portugal', code: 'PT', continent_code: 'EU'},
+    {id: 6, name: 'Turkey', code: 'TR', continent_code: 'EU'},
+  ]
 
-const books = [
-  {
-    id: '1',
-    title: 'Yabancı',
-    author_id: '1',
-    score: 7.3,
-    isPublished: true,
-  },
-  {
-    id: '2',
-    title: 'Albert C. Kitap',
-    author_id: '1',
-    score: 2.4,
-    isPublished: true,
-  },
-  {
-    id: '3',
-    title: 'Hayvan çiftiliği',
-    author_id: '2',
-    score: 7.3,
-    isPublished: true,
-  },
-];
+const languages = [
+    {id: 1, name: 'French', code: "FR", continent_code: 'EU'},
+    {id: 2, name: 'German', code: "DE", continent_code: 'EU'},
+    {id: 3, name: 'Italian', code: "IT", continent_code: 'EU'},
+    {id: 4, name: 'Polish', code: "PL", continent_code: 'EU'},
+    {id: 5, name: 'Portuguese', code: "PT", continent_code: 'EU'},
+    {id: 6, name: 'Turkish', code: "TR", continent_code: 'EU'},
+]
+
+const continents = [
+    {id: 1, name: "Africa", code: "AF"},
+    {id: 2, name: "Antarctica", code: "AN"},
+    {id: 3, name: "Asia", code: "AS"},
+    {id: 4, name: "Europe", code: "EU"},
+    {id: 5, name: "North America", code: "NA"}, 
+    {id: 6, name: "Oceania", code: "OC"},
+    {id: 7, name: "South America", code: "SA"},
+]
 
 
-module.exports = { authors, books }
+module.exports = {
+    countries,
+    languages,
+    continents,
+}
