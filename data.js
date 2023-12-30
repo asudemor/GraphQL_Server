@@ -32,7 +32,7 @@ const books = [
     id: '3',
     title: 'Hayvan çiftiliği',
     author_id: '2',
-    score: 7.3,
+    score: 7.9,
     isPublished: true,
   },
 ];
