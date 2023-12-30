@@ -1,0 +1,43 @@
+query getAllBooks {
+  books {
+    id
+    title
+  }
+}
+
+query getBook {
+  book(id: "2") {
+    id
+    title
+    author_id
+    author {
+      id
+      name
+      surname
+      age
+    }
+  }
+}
+
+query getAllAuthors {
+  authors {
+    id
+    name
+    surname
+    age
+  }
+}
+
+query getAuthor {
+  author(id: "1") {
+    id
+    name
+    surname
+    age 
+    books(filter: "Y"){
+      id
+      title
+      score
+    }
+  }
+}
